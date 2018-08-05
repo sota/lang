@@ -1,0 +1,12 @@
+[submodule "repos/pypy"]
+	path = repos/pypy
+	url = ssh://git@github.com/sota/pypy
+[submodule "repos/docopt"]
+	path = repos/docopt
+	url = ssh://git@github.com/docopt/docopt.cpp
+[submodule "repos/colm"]
+	path = repos/colm
+	url = ssh://git@github.com/sota/colm
+[submodule "repos/ragel"]
+	path = repos/ragel
+	url = ssh://git@github.com/sota/ragel
