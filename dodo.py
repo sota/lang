@@ -36,7 +36,7 @@ DOIT_CONFIG = {
 }
 
 ENVS = ' '.join([
-    'PYTHONPATH=.:src:src/pypy:$PYTHONPATH',
+    'PYTHONPATH=.:sota:sota/pypy:$PYTHONPATH',
 ])
 
 try:
@@ -95,7 +95,7 @@ def pre_pytest():
 #            'liblexer'
 #        ],
         actions=[
-            fmt('{ENVS} py.test -s -vv {PREDIR}'),
+            fmt('{ENVS} {PYTHON} -m pytest -s -vv {PREDIR}'),
         ],
     )
 
@@ -111,7 +111,7 @@ def pre_pycov():
 #            'liblexer',
 #        ],
         actions=[
-            fmt('{ENVS} py.test -s -vv --cov={SOTADIR} {PREDIR}'),
+            fmt('{ENVS} {PYTHON} -m pytest -s -vv --cov={SOTADIR} {PREDIR}'),
         ]
     )
 
