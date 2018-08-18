@@ -55,20 +55,26 @@ def task_version():
     '''
     write version.py and version.h
     '''
-    templates = rglob('sota/**.template')
+    templates = {}
+    for template in rglob('sota/*.template'):
+        filename = template[:-len('.template')]
+        contents = open(template).read().format(SOTA_VERSION=version)
+        templates[filename] = contents
     def render():
-        for template in templates:
-            filename = template[:-len('.template')]
-            with open(template) as t:
-                content = t.read().format(SOTA_VERSION=version)
-                with open(filename, 'w') as f:
-                    f.write(content)
+        for filename, contents in templates.items():
+            with open(filename, 'w') as f:
+                f.write(contents)
+    def uptodate():
+        for filename, contents in templates.items():
+            if os.path.isfile(filename):
+                if contents == open(filename).read():
+                    continue
+            return False
+        return True
     return dict(
-        actions=[
-            (render,),
-        ],
-        uptodate=[True],
-        targets=[template[:-len('.template')] for template in templates]
+        actions=[(render,)],
+        uptodate=[(uptodate,)],
+        targets=list(templates.keys()),
     )
 
 
