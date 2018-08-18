@@ -275,3 +275,29 @@ def task_post():
     '''
     yield post_pytest()
 
+def task_rmcache():
+    '''
+    recursively delete python cache files
+    '''
+    return dict(
+        actions=[
+            'find . -depth -name __pycache__ -type d -exec rm -r "{}" \;',
+            'find . -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
+        ]
+    )
+
+def task_tidy():
+    '''
+    clean submods and sota/lang repo
+    '''
+    yield dict(
+        name='sota/lang',
+        actions=['git clean -xfd'],
+    )
+    for submod in SUBS2SHAS.keys():
+        yield dict(
+            name=submod,
+            actions=[
+                fmt('cd {submod} && git reset --hard HEAD && git clean -xfd')
+            ],
+        )
