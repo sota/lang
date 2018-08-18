@@ -139,9 +139,14 @@ __pycache__
 *.out
 *.app
 
-# generated version files
-src/cli/version.h
-src/sota/version.py
-
 **/test
 
+# unix dirs
+bin/
+lib/
+include/
+share/
+
+# generated files
+sota/version.*
+sota/lexer/lexer.cpp

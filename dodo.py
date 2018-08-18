@@ -8,10 +8,12 @@ sys.dont_write_bytecode = True
 
 from ruamel import yaml
 from doit.task import clean_targets
-from sota.utils.fmt import fmt
 from sota.utils.git import subs2shas
 from sota.utils.shell import call, rglob, globs, which
-from sota.utils.version import SotaVersionWriter
+#from sota.utils.version import SotaVersionWriter
+
+from sota.utils.version import version
+from sota.utils.fmt import *
 
 REPOROOT = os.path.dirname(os.path.abspath(__file__))
 PREDIR = fmt('{REPOROOT}/tests')
@@ -32,7 +34,7 @@ SUBS2SHAS = subs2shas()
 
 DOIT_CONFIG = {
     'verbosity': 2,
-    'default_tasks': ['post'],
+    'default_tasks': ['pre'], #FIXME: should be post after those test are added
 }
 
 ENVS = ' '.join([
@@ -45,12 +47,87 @@ except:
     J = 1
 
 try:
-    SOTA_VERSION = open('VERSION').read().strip()
+    RMRF = which('rmrf')
 except:
-    try:
-        SOTA_VERSION = call('git describe')[1].strip()
-    except:
-        SOTA_VERSION = 'UNKNOWN'
+    RMRF = 'rm -rf'
+
+def task_version():
+    '''
+    write version.py and version.h
+    '''
+    templates = rglob('sota/**.template')
+    def render():
+        for template in templates:
+            filename = template[:-len('.template')]
+            with open(template) as t:
+                content = t.read().format(SOTA_VERSION=version)
+                with open(filename, 'w') as f:
+                    f.write(content)
+    return dict(
+        actions=[
+            (render,),
+        ],
+        uptodate=[True],
+        targets=[template[:-len('.template')] for template in templates]
+    )
+
+
+def task_colm():
+    '''
+    build colm binary for use in build
+    '''
+    return dict(
+        task_dep=[
+            'submod:repos/colm'
+        ],
+        actions=[
+            'cd repos/colm && autoreconf -f -i',
+            fmt('cd repos/colm && ./configure --prefix={REPOROOT}'),
+            'cd repos/colm && make && make install',
+        ],
+        uptodate=[True],
+        targets=[COLM],
+        clean=[clean_targets],
+    )
+
+def task_ragel():
+    '''
+    build ragel binary for use in build
+    '''
+    return dict(
+        task_dep=[
+            'submod:repos/ragel',
+            'colm'
+        ],
+        actions=[
+            'cd repos/ragel && autoreconf -f -i',
+            fmt('cd repos/ragel && ./configure --prefix={REPOROOT} --with-colm={REPOROOT} --disable-manual'),
+            'cd repos/ragel && make && make install',
+        ],
+        uptodate=[True],
+        targets=[RAGEL],
+        clean=[clean_targets],
+    )
+
+def task_liblexer():
+    '''
+    build so libary for use as sota's lexer
+    '''
+    files = ['sota/lexer/lexer.py'] + rglob('sota/lexer/*.{h,rl,c}')
+    return dict(
+        file_dep=files,
+        task_dep=[
+            'ragel',
+            'version',
+        ],
+        actions=[
+            fmt('cd sota/lexer && LD_LIBRARY_PATH={REPOROOT}/lib make -j {J} RAGEL={REPOROOT}/{RAGEL}'),
+            fmt('install -C -D sota/lexer/liblexer.so {LIBDIR}/liblexer.so'),
+        ],
+        uptodate=[True],
+        targets=[fmt('{LIBDIR}/liblexer.so')],
+        clean=[clean_targets],
+    )
 
 def task_submod():
     '''
@@ -75,10 +152,10 @@ def pre_pylint():
     '''
     return dict(
         name='pylint',
-#        task_dep=[
-#            'submod',
-#            'version:src/sota/version.py',
-#        ],
+        task_dep=[
+            'submod',
+            'version',
+        ],
         actions=[
             fmt('{ENVS} pylint -j{J} --rcfile {PREDIR}/pylint.rc {SOTADIR}'),
         ]
@@ -90,10 +167,11 @@ def pre_pytest():
     '''
     return dict(
         name='pytest',
-#        task_dep=[
-#            'version:src/sota/version.py',
-#            'liblexer'
-#        ],
+        task_dep=[
+            'submod',
+            'version',
+            'liblexer'
+        ],
         actions=[
             fmt('{ENVS} {PYTHON} -m pytest -s -vv {PREDIR}'),
         ],
@@ -105,11 +183,11 @@ def pre_pycov():
     '''
     return dict(
         name='pycov',
-#        task_dep=[
-#            'submod',
-#            'version:src/sota/version.py',
-#            'liblexer',
-#        ],
+        task_dep=[
+            'submod',
+            'version',
+            'liblexer',
+        ],
         actions=[
             fmt('{ENVS} {PYTHON} -m pytest -s -vv --cov={SOTADIR} {PREDIR}'),
         ]
@@ -122,4 +200,72 @@ def task_pre():
     yield pre_pylint()
     yield pre_pytest()
     yield pre_pycov()
+
+def task_libcli():
+    '''
+    build so libary for use as sota's commandline interface
+    '''
+    files = [DODO] + rglob('src/cli/*.{h,c,cpp}')
+    return dict(
+        file_dep=files,
+        task_dep=[
+            'submod:repos/docopt',
+            #'pre',
+        ],
+        actions=[
+            fmt('cd sota/cli && make -j {J}'),
+            fmt('install -C -D sota/cli/libcli.so {LIBDIR}/libcli.so'),
+        ],
+        uptodate=[True],
+        targets=[
+            'sota/cli/test',
+            fmt('{LIBDIR}/libcli.so'),
+        ],
+        clean=[clean_targets],
+    )
+
+def task_sota():
+    '''
+    build sota binary using rpython machinery
+    '''
+    return dict(
+        file_dep=[
+            DODO,
+            fmt('{LIBDIR}/libcli.so'),
+            fmt('{LIBDIR}/liblexer.so'),
+            fmt('{SOTADIR}/{TARGET}'),
+        ] + rglob(fmt('{SOTADIR}/*.py')),
+        task_dep=[
+            'pre',
+            'libcli',
+            'liblexer',
+        ],
+        actions=[
+            fmt('mkdir -p {BINDIR}'),
+            fmt('{PYTHON} -B {RPYTHON} --no-pdb --output {BINDIR}/sota {SOTADIR}/{TARGET}'),
+        ],
+        uptodate=[True],
+        targets=[fmt('{BINDIR}/sota')],
+        clean=[clean_targets],
+    )
+
+def post_pytest():
+    '''
+    run pytest after the build
+    '''
+    return dict(
+        name='pytest',
+        task_dep=[
+            'sota'
+        ],
+        actions=[
+            fmt('{ENVS} py.test -s -vv {POSTDIR}'),
+        ],
+    )
+
+def task_post():
+    '''
+    run tasks after the build: pytest
+    '''
+    yield post_pytest()
 

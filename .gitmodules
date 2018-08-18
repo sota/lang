@@ -10,3 +10,6 @@
 [submodule "repos/ragel"]
 	path = repos/ragel
 	url = ssh://git@github.com/sota/ragel
+[submodule "repos/utils"]
+	path = repos/utils
+	url = ssh://git@github.com/scottidler/utils
