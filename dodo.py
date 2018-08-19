@@ -20,6 +20,7 @@ POSTDIR = fmt('{REPOROOT}/tests/post')
 BINDIR = fmt('{REPOROOT}/bin')
 LIBDIR = fmt('{REPOROOT}/lib')
 SOTADIR = fmt('{REPOROOT}/sota')
+BINARY = 'sota-cli'
 
 DODO = 'dodo.py'
 COLM = 'bin/colm'
@@ -39,8 +40,6 @@ ENVS = ' '.join([
 ])
 
 ENVS = ''
-
-dbg(PYTHON)
 
 try:
     J = call('nproc')[1].strip()
@@ -250,10 +249,10 @@ def task_sota():
         ],
         actions=[
             fmt('mkdir -p {BINDIR}'),
-            fmt('{PYTHON} -B {RPYTHON} --no-pdb --output {BINDIR}/sota {TARGET}'),
+            fmt('{PYTHON} -B {RPYTHON} --no-pdb --output {BINDIR}/{BINARY} {TARGET}'),
         ],
         uptodate=[True],
-        targets=[fmt('{BINDIR}/sota')],
+        targets=[fmt('{BINDIR}/{BINARY}')],
         clean=[clean_targets],
     )
 
@@ -284,8 +283,8 @@ def task_rmcache():
     '''
     return dict(
         actions=[
-            'find . -depth -name __pycache__ -type d -exec rm -r "{}" \;',
-            'find . -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
+            'find sota/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
+            'find sota/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
         ]
     )
 

@@ -14,19 +14,21 @@ if [ -L "$0" ]; then
     REAL_PATH="$(dirname "$REAL_FILE")"
 fi
 
+REPOPATH="$(git rev-parse --show-toplevel)"
+BINDIR="$REPOPATH/bin"
+LIBDIR="$REPOPATH/lib"
 SPACES=" |'"
-BINDIR="$SCRIPT_PATH/bin"
-LIBDIR="$SCRIPT_PATH/lib"
-PROGRAM="$BINDIR/sota"
+BINARY="sota-cli"
+PROGRAM="$BINDIR/$BINARY"
 PYTHON=`which python2`
 ARGS=()
 for ARG in "$@"; do
     case $ARG in
         --pdb)
-        PROGRAM="$PYTHON -m pdb $SCRIPT_PATH/target.py"
+        PROGRAM="$PYTHON -m pdb $REPOPATH/target.py"
         ;;
         --py)
-        PROGRAM="$PYTHON $SCRIPT_PATH/target.py"
+        PROGRAM="$PYTHON $REPOPATH/target.py"
         ;;
         *)
         if [[ $ARG =~ $SPACES ]]; then
@@ -36,6 +38,6 @@ for ARG in "$@"; do
         ;;
     esac
 done
-CMD="LD_LIBRARY_PATH=lib:$LD_LIBRARY_PATH ${PROGRAM} ${ARGS[@]}"
+CMD="LD_LIBRARY_PATH=$LIBDIR:$LD_LIBRARY_PATH ${PROGRAM} ${ARGS[@]}"
 eval "$CMD"
 exit $?
