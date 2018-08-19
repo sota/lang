@@ -15,7 +15,7 @@ lib: lib$(NAME).so
 lib$(NAME).so: $(NAME).o docopt.o
 	$(CXX) $(LDFLAGS) -o lib$(NAME).so $(NAME).o docopt.o
 
-$(NAME).o: $(NAME).cpp version.h
+$(NAME).o: $(NAME).cpp ../version.h
 	$(CXX) $(CXXFLAGS) -c $(NAME).cpp -o $(NAME).o
 
 docopt.o:

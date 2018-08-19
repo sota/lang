@@ -27,8 +27,6 @@ RAGEL = 'bin/ragel'
 PYTHON = which('python2')
 RPYTHON = 'repos/pypy/rpython/bin/rpython'
 TARGET = 'target.py'
-VERSION_JSON = 'sota/version.json'
-VERSION_YML = 'sota/version.yml'
 SUBS2SHAS = subs2shas()
 
 DOIT_CONFIG = {
@@ -126,8 +124,8 @@ def task_liblexer():
     return dict(
         file_dep=files,
         task_dep=[
-            'ragel',
             'version',
+            'ragel',
         ],
         actions=[
             fmt('cd sota/lexer && LD_LIBRARY_PATH={REPOROOT}/lib make -j {J} RAGEL={REPOROOT}/{RAGEL}'),
@@ -177,9 +175,9 @@ def pre_pytest():
     return dict(
         name='pytest',
         task_dep=[
-            'submod',
             'version',
-            'liblexer'
+            'submod',
+            'liblexer',
         ],
         actions=[
             fmt('{ENVS} {PYTHON} -m pytest -s -vv {PREDIR}'),
@@ -193,8 +191,8 @@ def pre_pycov():
     return dict(
         name='pycov',
         task_dep=[
-            'submod',
             'version',
+            'submod',
             'liblexer',
         ],
         actions=[
@@ -214,10 +212,11 @@ def task_libcli():
     '''
     build so libary for use as sota's commandline interface
     '''
-    files = [DODO] + rglob('src/cli/*.{h,c,cpp}')
+    files = [DODO] + rglob('sota/cli/*.{h,c,cpp}')
     return dict(
         file_dep=files,
         task_dep=[
+            'version',
             'submod:repos/docopt',
         ],
         actions=[
@@ -239,11 +238,12 @@ def task_sota():
     return dict(
         file_dep=[
             DODO,
+            TARGET,
             fmt('{LIBDIR}/libcli.so'),
             fmt('{LIBDIR}/liblexer.so'),
-            fmt('{TARGET}'),
         ] + rglob(fmt('{SOTADIR}/*.py')),
         task_dep=[
+            'version',
             'pre',
             'libcli',
             'liblexer',
@@ -264,7 +264,8 @@ def post_pytest():
     return dict(
         name='pytest',
         task_dep=[
-            'sota'
+            'version',
+            'sota',
         ],
         actions=[
             fmt('{ENVS} {PYTHON} -m pytest -s -vv {POSTDIR}'),
