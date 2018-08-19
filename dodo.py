@@ -20,6 +20,8 @@ POSTDIR = fmt('{REPOROOT}/tests/post')
 BINDIR = fmt('{REPOROOT}/bin')
 LIBDIR = fmt('{REPOROOT}/lib')
 SOTADIR = fmt('{REPOROOT}/sota')
+VERSION_H = fmt('{SOTADIR}/version.h')
+VERSION_PY = fmt('{SOTADIR}/version.py')
 BINARY = 'sota-cli'
 
 DODO = 'dodo.py'
@@ -211,7 +213,7 @@ def task_libcli():
     '''
     build so libary for use as sota's commandline interface
     '''
-    files = [DODO] + rglob('sota/cli/*.{h,c,cpp}')
+    files = [DODO, VERSION_H] + rglob('sota/cli/*.{h,c,cpp}')
     return dict(
         file_dep=files,
         task_dep=[
