@@ -129,7 +129,7 @@ inline void write(const char *data, int len) {
     write data nofinal;
 }%%
 
-class Lexer {
+class SotaLexer {
     char const* const source;
     char const* const pe;
     char const* const eof;
@@ -145,7 +145,7 @@ class Lexer {
     std::vector<CToken> tokens;
 
 public:
-    Lexer(char const* const source)
+    SotaLexer(char const* const source)
         : source(source)
         , pe(source + strlen(source))
         , eof(source + strlen(source))
@@ -156,7 +156,7 @@ public:
         newlines.push_back(source-1);
     }
 
-    ~Lexer() {
+    ~SotaLexer() {
         newlines.clear();
         tokens.clear();
     }
@@ -221,7 +221,7 @@ public:
 
 extern "C" long scan(const char *source, struct CToken **tokens) {
     std::ios::sync_with_stdio(false);
-    Lexer lexer(source);
+    SotaLexer lexer(source);
     return lexer.Scan(tokens);
 }
 

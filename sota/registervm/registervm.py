@@ -15,7 +15,7 @@ class SotaRegisterVM(BaseStage):
         '''
         init
         '''
-        super(SotaRegisterVM, self).__init__()
+        BaseStage.__init__(self)
 
     def execute(self):
         '''

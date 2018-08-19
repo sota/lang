@@ -15,7 +15,7 @@ class SotaParser(BaseStage):
         '''
         init
         '''
-        super(SotaParser, self).__init__()
+        BaseStage.__init__(self)
 
     def parse(self):
         '''

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 '''
 sota.cli
@@ -8,13 +8,14 @@ import os
 import sys
 SCRIPT_PATH, BASENAME = os.path.split(os.path.realpath(__file__) )
 SCRIPT_NAME, SCRIPT_EXT = os.path.splitext(os.path.basename(BASENAME) )
-sys.path.insert(0, os.path.join(SCRIPT_PATH, '../pypy'))
+REPOROOT = os.path.abspath(os.path.join(SCRIPT_PATH, '../../'))
+sys.path.insert(0, os.path.join(REPOROOT, 'repos/pypy'))
 
 from rpython.rtyper.lltypesystem import rffi
 from rpython.translator.tool.cbuild import ExternalCompilationInfo
 
-lib_dir = os.path.join(os.getcwd(), 'lib')
-cli_dir = os.path.join(os.getcwd(), 'sota/cli')
+lib_dir = os.path.join(REPOROOT, 'lib')
+cli_dir = os.path.join(REPOROOT, 'sota/cli')
 cli_eci = ExternalCompilationInfo(
     include_dirs=[cli_dir],
     includes=['cli.h'],
@@ -41,16 +42,16 @@ c_clean = rffi.llexternal(
     rffi.LONG,
     compilation_info=cli_eci)
 
-class CliParseError(Exception):
-    '''
-    CliParseError
-    '''
-    def __init__(self, result):
-        '''
-        init
-        '''
-        msg = 'CliParseError result =' + str(result)
-        super(CliParseError, self).__init__(msg)
+#class CliParseError(Exception):
+#    '''
+#    CliParseError
+#    '''
+#    def __init__(self, result):
+#        '''
+#        init
+#        '''
+#        msg = 'CliParseError result =' + str(result)
+#        super(CliParseError, self).__init__(msg)
 
 def parse(argv):
     '''

@@ -10,7 +10,6 @@ from ruamel import yaml
 from doit.task import clean_targets
 from sota.utils.git import subs2shas
 from sota.utils.shell import call, rglob, globs, which
-#from sota.utils.version import SotaVersionWriter
 
 from sota.utils.version import version
 from sota.utils.fmt import *
@@ -34,12 +33,16 @@ SUBS2SHAS = subs2shas()
 
 DOIT_CONFIG = {
     'verbosity': 2,
-    'default_tasks': ['pre'], #FIXME: should be post after those test are added
+    'default_tasks': ['post'],
 }
 
 ENVS = ' '.join([
     'PYTHONPATH=.:sota:sota/pypy:$PYTHONPATH',
 ])
+
+ENVS = ''
+
+dbg(PYTHON)
 
 try:
     J = call('nproc')[1].strip()
@@ -163,7 +166,7 @@ def pre_pylint():
             'version',
         ],
         actions=[
-            fmt('{ENVS} pylint -j{J} --rcfile {PREDIR}/pylint.rc {SOTADIR}'),
+            fmt('{ENVS} pylint -j{J} --rcfile {PREDIR}/pylint.rc {SOTADIR} || true'),
         ]
     )
 
@@ -239,7 +242,8 @@ def task_sota():
             DODO,
             fmt('{LIBDIR}/libcli.so'),
             fmt('{LIBDIR}/liblexer.so'),
-            fmt('{SOTADIR}/{TARGET}'),
+            #fmt('{SOTADIR}/{TARGET}'),
+            fmt('{TARGET}'),
         ] + rglob(fmt('{SOTADIR}/*.py')),
         task_dep=[
             'pre',
@@ -248,7 +252,8 @@ def task_sota():
         ],
         actions=[
             fmt('mkdir -p {BINDIR}'),
-            fmt('{PYTHON} -B {RPYTHON} --no-pdb --output {BINDIR}/sota {SOTADIR}/{TARGET}'),
+            #fmt('{PYTHON} -B {RPYTHON} --no-pdb --output {BINDIR}/sota {SOTADIR}/{TARGET}'),
+            fmt('{PYTHON} -B {RPYTHON} --no-pdb --output {BINDIR}/sota {TARGET}'),
         ],
         uptodate=[True],
         targets=[fmt('{BINDIR}/sota')],
@@ -265,7 +270,7 @@ def post_pytest():
             'sota'
         ],
         actions=[
-            fmt('{ENVS} py.test -s -vv {POSTDIR}'),
+            fmt('{ENVS} {PYTHON} -m pytest -s -vv {POSTDIR}'),
         ],
     )
 
