@@ -219,7 +219,6 @@ def task_libcli():
         file_dep=files,
         task_dep=[
             'submod:repos/docopt',
-            #'pre',
         ],
         actions=[
             fmt('cd sota/cli && make -j {J}'),
@@ -242,7 +241,6 @@ def task_sota():
             DODO,
             fmt('{LIBDIR}/libcli.so'),
             fmt('{LIBDIR}/liblexer.so'),
-            #fmt('{SOTADIR}/{TARGET}'),
             fmt('{TARGET}'),
         ] + rglob(fmt('{SOTADIR}/*.py')),
         task_dep=[
@@ -252,7 +250,6 @@ def task_sota():
         ],
         actions=[
             fmt('mkdir -p {BINDIR}'),
-            #fmt('{PYTHON} -B {RPYTHON} --no-pdb --output {BINDIR}/sota {SOTADIR}/{TARGET}'),
             fmt('{PYTHON} -B {RPYTHON} --no-pdb --output {BINDIR}/sota {TARGET}'),
         ],
         uptodate=[True],
