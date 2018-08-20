@@ -166,7 +166,24 @@ def pre_pycov():
         ],
         actions=[
             fmt('{PYTHON} -m pytest -s -vv --cov={SOTADIR} {PREDIR}'),
-        ]
+        ],
+    )
+
+def pre_mypy():
+    '''
+    run mypy before the build
+    '''
+    packages = [d for d in os.listdir('sota') if d != 'utils' and os.path.isdir('sota/'+d)]
+    return dict(
+        name='mypy',
+        task_dep=[
+            'version',
+            'submod',
+            'liblexer',
+        ],
+        actions=[
+            'mypy' + ''.join([fmt(' --module sota.{package}') for package in packages]),
+        ],
     )
 
 def task_pre():
@@ -176,6 +193,7 @@ def task_pre():
     yield pre_pylint()
     yield pre_pytest()
     yield pre_pycov()
+    yield pre_mypy()
 
 def task_libcli():
     '''

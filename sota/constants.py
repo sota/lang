@@ -25,7 +25,7 @@ __all__ = [
 ]
 
 from .utils.git import reporoot, subs2shas
-from .utils.shell import which
+from .utils.shell import call, which
 from .utils.version import version
 
 BINARY = 'sota-cli'
