@@ -148,5 +148,6 @@ include/
 share/
 
 # generated files
-sota/version.*
+sota/version.h
+sota/version.py
 sota/lexer/lexer.cpp
