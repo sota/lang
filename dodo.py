@@ -27,7 +27,7 @@ def task_version():
     templates = {}
     for template in rglob('sota/*.template'):
         filename = template[:-len('.template')]
-        contents = open(template).read().format(SOTA_VERSION=VERSION)
+        contents = fmt(open(template).read())
         templates[filename] = contents
     def render():
         for filename, contents in templates.items():

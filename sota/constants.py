@@ -5,7 +5,6 @@ __all__ = [
     'BINARY',
     'REPOROOT',
     'SUBS2SHAS',
-    'VERSION',
     'SOTADIR',
     'BINDIR',
     'LIBDIR',
@@ -22,6 +21,7 @@ __all__ = [
     'VERSION_PY',
     'J',
     'RMRF',
+    'SOTA_VERSION',
 ]
 
 from .utils.git import reporoot, subs2shas
@@ -31,7 +31,6 @@ from .utils.version import version
 BINARY = 'sota-cli'
 REPOROOT = reporoot()
 SUBS2SHAS = subs2shas()
-VERSION = version
 SOTADIR = REPOROOT + '/sota'
 BINDIR = REPOROOT + '/bin'
 LIBDIR = REPOROOT + '/lib'
@@ -46,6 +45,7 @@ PYTHON = which('python2')
 RPYTHON = REPOROOT + '/repos/pypy/rpython/bin/rpython'
 VERSION_H = SOTADIR + '/version.h'
 VERSION_PY = SOTADIR + '/version.py'
+SOTA_VERSION = version
 
 try:
     J = call('nproc')[1].strip()
