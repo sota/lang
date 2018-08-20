@@ -2,7 +2,7 @@
 sota.token
 '''
 
-class Token(object): #pylint: disable=too-few-public-methods
+class Token(object):
     '''
     Token
     '''

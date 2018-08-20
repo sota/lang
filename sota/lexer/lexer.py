@@ -15,7 +15,7 @@ sys.path.insert(0, PYPYDIR)
 from rpython.rtyper.lltypesystem import rffi, lltype
 from rpython.translator.tool.cbuild import ExternalCompilationInfo
 
-from .tokens import Token
+from .token import Token
 
 CTOKEN = rffi.CStruct(
     'CToken',
