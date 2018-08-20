@@ -6,16 +6,15 @@ sota.cli
 
 import os
 import sys
-SCRIPT_PATH, BASENAME = os.path.split(os.path.realpath(__file__) )
-SCRIPT_NAME, SCRIPT_EXT = os.path.splitext(os.path.basename(BASENAME) )
-REPOROOT = os.path.abspath(os.path.join(SCRIPT_PATH, '../../'))
-sys.path.insert(0, os.path.join(REPOROOT, 'repos/pypy'))
+
+from sota.constants import LIBDIR, SOTADIR, PYPYDIR
+sys.path.insert(0, PYPYDIR)
 
 from rpython.rtyper.lltypesystem import rffi
 from rpython.translator.tool.cbuild import ExternalCompilationInfo
 
-lib_dir = os.path.join(REPOROOT, 'lib')
-cli_dir = os.path.join(REPOROOT, 'sota/cli')
+lib_dir = LIBDIR
+cli_dir = SOTADIR + '/cli'
 cli_eci = ExternalCompilationInfo(
     include_dirs=[cli_dir],
     includes=['cli.h'],

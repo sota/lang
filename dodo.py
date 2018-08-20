@@ -8,50 +8,17 @@ sys.dont_write_bytecode = True
 
 from ruamel import yaml
 from doit.task import clean_targets
-from sota.utils.git import subs2shas
-from sota.utils.shell import call, rglob, globs, which
-
-from sota.utils.version import version
-from sota.utils.fmt import *
-
-REPOROOT = os.path.dirname(os.path.abspath(__file__))
-PREDIR = fmt('{REPOROOT}/tests')
-POSTDIR = fmt('{REPOROOT}/tests/post')
-BINDIR = fmt('{REPOROOT}/bin')
-LIBDIR = fmt('{REPOROOT}/lib')
-SOTADIR = fmt('{REPOROOT}/sota')
-VERSION_H = fmt('{SOTADIR}/version.h')
-VERSION_PY = fmt('{SOTADIR}/version.py')
-BINARY = 'sota-cli'
+from sota.utils.shell import call, rglob
+from sota.utils.fmt import fmt, pfmt, dbg
+from sota.constants import *
 
 DODO = 'dodo.py'
 COLM = 'bin/colm'
 RAGEL = 'bin/ragel'
-PYTHON = which('python2')
-RPYTHON = 'repos/pypy/rpython/bin/rpython'
-TARGET = 'target.py'
-SUBS2SHAS = subs2shas()
-
 DOIT_CONFIG = {
     'verbosity': 2,
     'default_tasks': ['post'],
 }
-
-ENVS = ' '.join([
-    'PYTHONPATH=.:sota:sota/pypy:$PYTHONPATH',
-])
-
-ENVS = ''
-
-try:
-    J = call('nproc')[1].strip()
-except:
-    J = 1
-
-try:
-    RMRF = which('rmrf')
-except:
-    RMRF = 'rm -rf'
 
 def task_version():
     '''
@@ -60,7 +27,7 @@ def task_version():
     templates = {}
     for template in rglob('sota/*.template'):
         filename = template[:-len('.template')]
-        contents = open(template).read().format(SOTA_VERSION=version)
+        contents = open(template).read().format(SOTA_VERSION=VERSION)
         templates[filename] = contents
     def render():
         for filename, contents in templates.items():
@@ -165,7 +132,7 @@ def pre_pylint():
             'version',
         ],
         actions=[
-            fmt('{ENVS} pylint -j{J} --rcfile {PREDIR}/pylint.rc {SOTADIR} || true'),
+            fmt('pylint -j{J} --rcfile {PREDIR}/pylint.rc {SOTADIR} || true'),
         ]
     )
 
@@ -181,7 +148,8 @@ def pre_pytest():
             'liblexer',
         ],
         actions=[
-            fmt('{ENVS} {PYTHON} -m pytest -s -vv {PREDIR}'),
+            fmt('echo "{REPOROOT}"'),
+            fmt('{PYTHON} -m pytest -s -vv {PREDIR}'),
         ],
     )
 
@@ -197,7 +165,7 @@ def pre_pycov():
             'liblexer',
         ],
         actions=[
-            fmt('{ENVS} {PYTHON} -m pytest -s -vv --cov={SOTADIR} {PREDIR}'),
+            fmt('{PYTHON} -m pytest -s -vv --cov={SOTADIR} {PREDIR}'),
         ]
     )
 
@@ -269,7 +237,7 @@ def post_pytest():
             'sota',
         ],
         actions=[
-            fmt('{ENVS} {PYTHON} -m pytest -s -vv {POSTDIR}'),
+            fmt('{PYTHON} -m pytest -s -vv {POSTDIR}'),
         ],
     )
 
@@ -287,6 +255,8 @@ def task_rmcache():
         actions=[
             'find sota/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
             'find sota/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
+            'find tests/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
+            'find tests/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
         ]
     )
 

@@ -8,13 +8,9 @@ import os
 import sys
 sys.dont_write_bytecode = True
 
-SCRIPT_FILE = os.path.abspath(__file__)
-SCRIPT_NAME = os.path.basename(SCRIPT_FILE)
-SCRIPT_PATH = os.path.dirname(SCRIPT_FILE)
+from sota.constants import REPOROOT, PYPYDIR
 
-REPOROOT = os.path.abspath(os.path.join(SCRIPT_PATH, '../../'))
-
-sys.path.insert(0, os.path.join(REPOROOT, 'repos/pypy'))
+sys.path.insert(0, PYPYDIR)
 
 from rpython.rtyper.lltypesystem import rffi, lltype
 from rpython.translator.tool.cbuild import ExternalCompilationInfo
