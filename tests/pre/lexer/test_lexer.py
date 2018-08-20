@@ -13,5 +13,4 @@ def test_ctor(lexer):
 
 def test_scan(lexer):
     tokens = lexer.scan('0')
-    print([token.value for token in tokens])
     assert tokens
