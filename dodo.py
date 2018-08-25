@@ -269,14 +269,16 @@ def task_rmcache():
     '''
     recursively delete python cache files
     '''
-    return dict(
-        actions=[
-            'find sota/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
-            'find sota/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
-            'find tests/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
-            'find tests/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
-        ]
-    )
+    pycache = dict(py2='*.pyc', py3='__pycache__')
+    exec_rm = '-exec rm -r "{}" \;'
+    for py, cache in pycache.items():
+        for dir_ in ('sota', 'tests'):
+            yield dict(
+                name=py + '-' + dir_,
+                actions=[
+                    fmt('find {dir_} -depth -name {cache} -type d {exec_rm}'),
+                ],
+            )
 
 def task_tidy():
     '''
