@@ -5,9 +5,12 @@ __all__ = [
     'BINARY',
     'REPOROOT',
     'SUBS2SHAS',
-    'SOTADIR',
     'BINDIR',
     'LIBDIR',
+    'SOTADIR',
+    'CLIDIR',
+    'LEXERDIR',
+    'SHA256DIR',
     'PREDIR',
     'POSTDIR',
     'PYPYDIR',
@@ -19,7 +22,7 @@ __all__ = [
     'RPYTHON',
     'VERSION_H',
     'VERSION_PY',
-    'J',
+    'JOBS',
     'RMRF',
     'SOTA_VERSION',
 ]
@@ -31,9 +34,12 @@ from .utils.version import version
 BINARY = 'sota-cli'
 REPOROOT = reporoot()
 SUBS2SHAS = subs2shas()
-SOTADIR = REPOROOT + '/sota'
 BINDIR = REPOROOT + '/bin'
 LIBDIR = REPOROOT + '/lib'
+SOTADIR = REPOROOT + '/sota'
+CLIDIR = SOTADIR + '/cli'
+LEXERDIR = SOTADIR + '/lexer'
+SHA256DIR = SOTADIR + '/sha256'
 PREDIR = REPOROOT + '/tests/pre'
 POSTDIR = REPOROOT + '/tests/post'
 PYPYDIR = REPOROOT + '/repos/pypy'
@@ -48,9 +54,9 @@ VERSION_PY = SOTADIR + '/version.py'
 SOTA_VERSION = version
 
 try:
-    J = call('nproc')[1].strip()
+    JOBS = call('nproc')[1].strip()
 except:
-    J = 1
+    JOBS = 1
 
 try:
     RMRF = which('rmrf')
