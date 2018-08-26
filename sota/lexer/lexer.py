@@ -8,14 +8,13 @@ import os
 import sys
 sys.dont_write_bytecode = True
 
-from sota.constants import REPOROOT, PYPYDIR
-
+from sota.constants import LIBDIR, PYPYDIR, LEXERDIR
 sys.path.insert(0, PYPYDIR)
-
-from .token import Token
 
 from rpython.rtyper.lltypesystem import rffi, lltype
 from rpython.translator.tool.cbuild import ExternalCompilationInfo
+
+from .token import Token
 
 CTOKEN = rffi.CStruct(
     'CToken',
@@ -29,12 +28,10 @@ CTOKEN = rffi.CStruct(
 CTOKENP = rffi.CArrayPtr(CTOKEN)
 CTOKENPP = rffi.CArrayPtr(CTOKENP)
 
-lib_dir = os.path.join(REPOROOT, 'lib')
-lexer_dir = os.path.join(REPOROOT, 'sota/lexer')
 lexer_eci = ExternalCompilationInfo(
-    include_dirs=[lexer_dir],
+    include_dirs=[LEXERDIR],
     includes=['lexer.h'],
-    library_dirs=[lib_dir],
+    library_dirs=[LIBDIR],
     libraries=['lexer'],
     use_cpp_linker=True)
 

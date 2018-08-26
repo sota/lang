@@ -7,17 +7,16 @@ sota.cli
 import os
 import sys
 
-from sota.constants import LIBDIR, SOTADIR, PYPYDIR
+from sota.constants import LIBDIR, PYPYDIR, CLIDIR
 sys.path.insert(0, PYPYDIR)
 
 from rpython.rtyper.lltypesystem import rffi
 from rpython.translator.tool.cbuild import ExternalCompilationInfo
-lib_dir = LIBDIR
-cli_dir = SOTADIR + '/cli'
+
 cli_eci = ExternalCompilationInfo(
-    include_dirs=[cli_dir],
+    include_dirs=[CLIDIR],
     includes=['cli.h'],
-    library_dirs=[lib_dir],
+    library_dirs=[LIBDIR],
     libraries=['cli'],
     use_cpp_linker=True)
 CliToken = rffi.CStruct(
