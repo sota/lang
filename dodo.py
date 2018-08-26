@@ -8,6 +8,7 @@ sys.dont_write_bytecode = True
 
 from ruamel import yaml
 from doit.task import clean_targets
+
 from sota.utils.shell import call, rglob
 from sota.utils.fmt import fmt, pfmt, dbg
 from sota.constants import *

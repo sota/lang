@@ -8,27 +8,21 @@ import os
 import sys
 
 from sota.cli import cli
-from sota.lexer import SotaLexer
+from sota import Sota
 
 def entry_point(argv):
     '''
     entry_point
     '''
+    sota = Sota()
     args = cli.parse(argv)
+    exitcode = 0
     if '<source>' in args:
         source = args['<source>']
-        lexer = SotaLexer()
-        if os.path.exists(source):
-            with open(source, 'r') as f:
-                source = f.read()
-        print('source found:')
-        print(source)
-        tokens = lexer.scan(source)
-        for token in tokens:
-            print(token.to_str())
+        exitcode = sota.run(source)
     else:
-        print('repl time')
-    return 0
+        exitcode = sota.repl()
+    return exitcode
 
 def target(*args):
     '''

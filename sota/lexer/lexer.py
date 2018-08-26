@@ -12,10 +12,10 @@ from sota.constants import REPOROOT, PYPYDIR
 
 sys.path.insert(0, PYPYDIR)
 
+from .token import Token
+
 from rpython.rtyper.lltypesystem import rffi, lltype
 from rpython.translator.tool.cbuild import ExternalCompilationInfo
-
-from .token import Token
 
 CTOKEN = rffi.CStruct(
     'CToken',
@@ -28,6 +28,21 @@ CTOKEN = rffi.CStruct(
 
 CTOKENP = rffi.CArrayPtr(CTOKEN)
 CTOKENPP = rffi.CArrayPtr(CTOKENP)
+
+lib_dir = os.path.join(REPOROOT, 'lib')
+lexer_dir = os.path.join(REPOROOT, 'sota/lexer')
+lexer_eci = ExternalCompilationInfo(
+    include_dirs=[lexer_dir],
+    includes=['lexer.h'],
+    library_dirs=[lib_dir],
+    libraries=['lexer'],
+    use_cpp_linker=True)
+
+c_scan = rffi.llexternal( #pylint: disable=invalid-name
+    'scan',
+    [rffi.CONST_CCHARP, CTOKENPP],
+    rffi.LONG,
+    compilation_info=lexer_eci)
 
 def deref(obj):
     '''
@@ -47,21 +62,6 @@ def escape(old):
         else:
             new += char
     return new
-
-lib_dir = os.path.join(REPOROOT, 'lib')
-lexer_dir = os.path.join(REPOROOT, 'sota/lexer')
-lexer_eci = ExternalCompilationInfo(
-    include_dirs=[lexer_dir],
-    includes=['lexer.h'],
-    library_dirs=[lib_dir],
-    libraries=['lexer'],
-    use_cpp_linker=True)
-
-c_scan = rffi.llexternal( #pylint: disable=invalid-name
-    'scan',
-    [rffi.CONST_CCHARP, CTOKENPP],
-    rffi.LONG,
-    compilation_info=lexer_eci)
 
 class LookaheadBeyondEndOfTokens(Exception):
     '''

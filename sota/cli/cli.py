@@ -12,7 +12,6 @@ sys.path.insert(0, PYPYDIR)
 
 from rpython.rtyper.lltypesystem import rffi
 from rpython.translator.tool.cbuild import ExternalCompilationInfo
-
 lib_dir = LIBDIR
 cli_dir = SOTADIR + '/cli'
 cli_eci = ExternalCompilationInfo(
