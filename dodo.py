@@ -187,13 +187,14 @@ def task_liblexer():
             'ragel',
         ],
         actions=[
-            fmt('cd {LEXERDIR} && LD_LIBRARY_PATH={LIBDIR} make -j {JOBS} RAGEL={RAGEL}'),
+            fmt('cd {LEXERDIR} && LD_LIBRARY_PATH={LIBDIR} make --trace -j {JOBS} RAGEL={RAGEL}'),
             fmt('install -C -D {LEXERDIR}/liblexer.so {LIBDIR}/liblexer.so'),
         ],
         uptodate=[True],
         targets=[
-            fmt('{LEXERDIR}/test'),
             fmt('{LIBDIR}/liblexer.so'),
+            fmt('{LEXERDIR}/lexer.cpp'),
+            fmt('{LEXERDIR}/test'),
         ],
         clean=[clean_targets],
     )
@@ -210,7 +211,7 @@ def task_libcli():
             fmt('submod:repos/docopt'),
         ],
         actions=[
-            fmt('cd {CLIDIR} && make -j {JOBS}'),
+            fmt('cd {CLIDIR} && make --trace -j {JOBS}'),
             fmt('install -C -D {CLIDIR}/libcli.so {LIBDIR}/libcli.so'),
         ],
         uptodate=[True],
@@ -232,7 +233,7 @@ def task_libsha256():
             'version',
         ],
         actions=[
-            fmt('cd {SHA256DIR} && make -j {JOBS}'),
+            fmt('cd {SHA256DIR} && make --trace -j {JOBS}'),
             fmt('install -C -D {SHA256DIR}/libsha256.so {LIBDIR}/libsha256.so'),
         ],
         uptodate=[True],
