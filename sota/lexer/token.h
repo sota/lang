@@ -26,6 +26,7 @@ struct CToken {
     long line;
     long pos;
     long skip;
+    long debug;
 };
 
 #ifdef __cplusplus

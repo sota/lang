@@ -42,13 +42,15 @@ int main(int argc, char *argv[]) {
     printf("count = %ld\n", count);
     for (int i=0; i<count; ++i) {
         struct CToken token = tokens[i];
-        printf("Token {start=%ld end=%ld kind=%ld line=%ld pos=%ld skip=%ld}\n"\
+        printf("token.debug = %ld\n", token.debug);
+        printf("Token {start=%ld end=%ld kind=%ld line=%ld pos=%ld skip=%ld debug=%ld}\n"\
             , token.start\
             , token.end\
             , token.kind\
             , token.line\
             , token.pos\
-            , token.skip);
+            , token.skip\
+            , token.debug);
         substring(content, token.start, token.end);
         printf("\n");
     }

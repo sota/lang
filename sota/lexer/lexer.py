@@ -23,7 +23,8 @@ CTOKEN = rffi.CStruct(
     ('kind', rffi.LONG),
     ('line', rffi.LONG),
     ('pos', rffi.LONG),
-    ('skip', rffi.LONG))
+    ('skip', rffi.LONG),
+    ('debug', rffi.LONG))
 
 CTOKENP = rffi.CArrayPtr(CTOKEN)
 CTOKENPP = rffi.CArrayPtr(CTOKENP)
@@ -110,11 +111,12 @@ class SotaLexer(object):
                 line    = rffi.cast(lltype.Signed, ctoken.c_line)
                 pos     = rffi.cast(lltype.Signed, ctoken.c_pos)
                 skip    = rffi.cast(lltype.Signed, ctoken.c_skip) != 0
+                debug   = rffi.cast(lltype.Signed, ctoken.c_debug)
                 name    = self.kind2name.get(kind, None)
                 assert start >= 0, "start not >= 0"
                 assert end >= 0, "end not >= 0"
                 value   = self.source[start:end]
-                self.tokens.append(Token(name, value, kind, line, pos, skip))
+                self.tokens.append(Token(name, value, kind, line, pos, skip, debug))
         return self.tokens
 
     def lookahead(self, distance, expect=None, skips=False):

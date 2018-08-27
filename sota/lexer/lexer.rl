@@ -188,23 +188,26 @@ public:
         return 0;
     }
 
-    void Token(long kind, long trim=0) {
+    void Token(long kind, long trim=0, long debug=0) {
         tokens.push_back({
             ts - source + trim,
             te - source - trim,
             kind,
             Line(ts),
-            Pos(ts)});
+            Pos(ts),
+            0,
+            13});
     }
 
-    void Token(long start, long end, long kind, long line, long pos, long skip) {
+    void Token(long start, long end, long kind, long line, long pos, long skip, long debug=0) {
         tokens.push_back({
             start,
             end,
             kind,
             line,
             pos,
-            skip});
+            skip,
+            13});
     }
 
     long Scan(CToken **tokens) {
