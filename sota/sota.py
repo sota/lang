@@ -3,12 +3,15 @@
 
 import os
 from .lexer import SotaLexer
+from .sha256 import sha256
 
 class Sota(object):
     def __init__(self):
         pass
 
     def run(self, source):
+        unique = sha256(source)
+        print('unique =', unique)
         lexer = SotaLexer()
         if os.path.exists(source):
             with open(source, 'r') as f:
