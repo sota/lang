@@ -15,5 +15,6 @@ int main(int argc, char *argv[]) {
 
     printf("sha256 of '%s' =>\n%s\n", input, output);
     free((char *)output);
+    printf("buh-bye\n");
     return 0;
 }
