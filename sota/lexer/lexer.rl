@@ -52,7 +52,7 @@ inline void write(const char *data, int len) {
     doublequote     = '"';
     newline         = "\n\r"|'\n'|'\r';
     number          = digit+ ('.' digit+)?;
-    syntax          = '"'|"'"|'.'|'('|')'|'['|']'|'{'|'}'|';';
+    syntax          = '"'|"'"|'.'|','|'('|')'|'['|']'|'{'|'}'|':'|';';
     symbol          = (any - ('#'|whitespace|newline|syntax))+;
     counter         = (any | newline @{AddNewline(fpc);})*;
 
