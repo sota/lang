@@ -4,8 +4,11 @@
 __all__ = [
     'BINARY',
     'REPOROOT',
+    'DODO',
     'SUBS2SHAS',
     'BINDIR',
+    'COLM',
+    'RAGEL',
     'LIBDIR',
     'SOTADIR',
     'CLIDIR',
@@ -18,12 +21,12 @@ __all__ = [
     'RAGELDIR',
     'DOCOPTDIR',
     'TARGET',
-    'PYTHON',
     'RPYTHON',
     'VERSION_H',
     'VERSION_PY',
     'JOBS',
     'RMRF',
+    'PYTHON',
     'SOTA_VERSION',
 ]
 
@@ -33,8 +36,11 @@ from .utils.version import version
 
 BINARY = 'sota-cli'
 REPOROOT = reporoot()
+DODO = REPOROOT + '/dodo.py'
 SUBS2SHAS = subs2shas()
 BINDIR = REPOROOT + '/bin'
+COLM = BINDIR + '/colm'
+RAGEL = BINDIR + '/ragel'
 LIBDIR = REPOROOT + '/lib'
 SOTADIR = REPOROOT + '/sota'
 CLIDIR = SOTADIR + '/cli'
@@ -47,10 +53,10 @@ COLMDIR = REPOROOT + '/repos/colm'
 RAGELDIR = REPOROOT + '/repos/ragel'
 DOCOPTDIR = REPOROOT + '/repos/docopt'
 TARGET = REPOROOT + '/target.py'
-PYTHON = which('python2')
 RPYTHON = REPOROOT + '/repos/pypy/rpython/bin/rpython'
 VERSION_H = SOTADIR + '/version.h'
 VERSION_PY = SOTADIR + '/version.py'
+PYTHON = which('python2')
 SOTA_VERSION = version
 
 try:
