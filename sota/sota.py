@@ -11,7 +11,7 @@ class Sota(object):
 
     def run(self, source):
         unique = sha256(source)
-        print('unique =', unique)
+        print('unique = ' + unique)
         lexer = SotaLexer()
         if os.path.exists(source):
             with open(source, 'r') as f:
