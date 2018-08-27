@@ -47,13 +47,14 @@ inline void write(const char *data, int len) {
     machine sast;
 
     whitespace      = ' '+;
+    assign          = '=';
     tab             = '\t';
     hash            = '#';
     doublequote     = '"';
     newline         = "\n\r"|'\n'|'\r';
     number          = digit+ ('.' digit+)?;
     syntax          = '"'|"'"|'.'|','|'('|')'|'['|']'|'{'|'}'|':'|';';
-    symbol          = (any - ('#'|whitespace|newline|syntax))+;
+    symbol          = (any -- ('#'|whitespace|newline|assign|syntax))+;
     counter         = (any | newline @{AddNewline(fpc);})*;
 
     commenter := |*
@@ -110,10 +111,6 @@ inline void write(const char *data, int len) {
 
         number => {
             Token(TokenKind::Number);
-        };
-
-        "'" => {
-            Token(TokenKind::Symbol);
         };
 
         symbol => {
