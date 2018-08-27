@@ -15,9 +15,9 @@ from rpython.translator.tool.cbuild import ExternalCompilationInfo
 
 cli_eci = ExternalCompilationInfo(
     include_dirs=[SHA256DIR],
-    includes=['cli.h'],
+    includes=['sha256.h'],
     library_dirs=[LIBDIR],
-    libraries=['cli'],
+    libraries=['sha256'],
     use_cpp_linker=True)
 c_sha256 = rffi.llexternal(
     'sha256',
@@ -29,5 +29,4 @@ def sha256(text):
     '''
     sha256
     '''
-    unique = c_sha256(rffi.str2charp(text))
-    return unique
+    return rffi.charp2str(c_sha256(rffi.str2charp(text)))
