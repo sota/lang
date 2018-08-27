@@ -13,9 +13,6 @@ from sota.utils.shell import call, rglob
 from sota.utils.fmt import fmt, pfmt, dbg
 from sota.constants import *
 
-DODO = 'dodo.py'
-COLM = 'bin/colm'
-RAGEL = 'bin/ragel'
 DOIT_CONFIG = {
     'verbosity': 2,
     'default_tasks': ['post'],
@@ -89,6 +86,7 @@ def pre_pytest():
             'version',
             'submod',
             'liblexer',
+            'libsha256',
         ],
         actions=[
             fmt('echo "{REPOROOT}"'),
@@ -106,6 +104,7 @@ def pre_pycov():
             'version',
             'submod',
             'liblexer',
+            'libsha256',
         ],
         actions=[
             fmt('{PYTHON} -m pytest -s -vv --cov={SOTADIR} {PREDIR}'),
@@ -123,6 +122,7 @@ def pre_mypy():
             'version',
             'submod',
             'liblexer',
+            'libsha256',
         ],
         actions=[
             'mypy' + ''.join([fmt(' --module sota.{package}') for package in packages]),
@@ -144,12 +144,12 @@ def task_colm():
     '''
     return dict(
         task_dep=[
-            'submod:repos/colm'
+            fmt('submod:repos/colm'),
         ],
         actions=[
-            'cd repos/colm && autoreconf -f -i',
-            fmt('cd repos/colm && ./configure --prefix={REPOROOT}'),
-            'cd repos/colm && make && make install',
+            fmt('cd {COLMDIR} && autoreconf -f -i'),
+            fmt('cd {COLMDIR} && ./configure --prefix={REPOROOT}'),
+            fmt('cd {COLMDIR} && make && make install'),
         ],
         uptodate=[True],
         targets=[COLM],
@@ -162,13 +162,13 @@ def task_ragel():
     '''
     return dict(
         task_dep=[
-            'submod:repos/ragel',
-            'colm'
+            fmt('submod:repos/ragel'),
+            'colm',
         ],
         actions=[
-            'cd repos/ragel && autoreconf -f -i',
-            fmt('cd repos/ragel && ./configure --prefix={REPOROOT} --with-colm={REPOROOT} --disable-manual'),
-            'cd repos/ragel && make && make install',
+            fmt('cd {RAGELDIR} && autoreconf -f -i'),
+            fmt('cd {RAGELDIR} && ./configure --prefix={REPOROOT} --with-colm={REPOROOT} --disable-manual'),
+            fmt('cd {RAGELDIR} && make && make install'),
         ],
         uptodate=[True],
         targets=[RAGEL],
@@ -179,7 +179,7 @@ def task_liblexer():
     '''
     build so libary for use as sota's lexer
     '''
-    files = ['sota/lexer/lexer.py'] + rglob('sota/lexer/*.{h,rl,c}')
+    files = [fmt('{LEXERDIR}/lexer.py')] + rglob(LEXERDIR + '/*.{h,rl,c}')
     return dict(
         file_dep=files,
         task_dep=[
@@ -187,11 +187,14 @@ def task_liblexer():
             'ragel',
         ],
         actions=[
-            fmt('cd sota/lexer && LD_LIBRARY_PATH={REPOROOT}/lib make -j {JOBS} RAGEL={REPOROOT}/{RAGEL}'),
-            fmt('install -C -D sota/lexer/liblexer.so {LIBDIR}/liblexer.so'),
+            fmt('cd {LEXERDIR} && LD_LIBRARY_PATH={LIBDIR} make -j {JOBS} RAGEL={RAGEL}'),
+            fmt('install -C -D {LEXERDIR}/liblexer.so {LIBDIR}/liblexer.so'),
         ],
         uptodate=[True],
-        targets=[fmt('{LIBDIR}/liblexer.so')],
+        targets=[
+            fmt('{LEXERDIR}/test'),
+            fmt('{LIBDIR}/liblexer.so'),
+        ],
         clean=[clean_targets],
     )
 
@@ -199,20 +202,20 @@ def task_libcli():
     '''
     build so libary for use as sota's commandline interface
     '''
-    files = [DODO, VERSION_H] + rglob('sota/cli/*.{h,c,cpp}')
+    files = [DODO, VERSION_H] + rglob(CLIDIR + '/*.{h,c,cpp}')
     return dict(
         file_dep=files,
         task_dep=[
             'version',
-            'submod:repos/docopt',
+            fmt('submod:repos/docopt'),
         ],
         actions=[
-            fmt('cd sota/cli && make -j {JOBS}'),
-            fmt('install -C -D sota/cli/libcli.so {LIBDIR}/libcli.so'),
+            fmt('cd {CLIDIR} && make -j {JOBS}'),
+            fmt('install -C -D {CLIDIR}/libcli.so {LIBDIR}/libcli.so'),
         ],
         uptodate=[True],
         targets=[
-            'sota/cli/test',
+            fmt('{CLIDIR}/test'),
             fmt('{LIBDIR}/libcli.so'),
         ],
         clean=[clean_targets],
@@ -222,19 +225,19 @@ def task_libsha256():
     '''
     build so library for use as sota's sha256 hashing functionality
     '''
-    files = [DODO] + rglob('sota/sha256/*.{h,c,cpp}')
+    files = [DODO] + rglob(SHA256DIR + '/*.{h,c,cpp}')
     return dict(
         file_dep=files,
         task_dep=[
             'version',
         ],
         actions=[
-            fmt('cd sota/sha256 && make -j {JOBS}'),
-            fmt('install -C -D sota/sha256/libsha256.so {LIBDIR}/libsha256.so'),
+            fmt('cd {SHA256DIR} && make -j {JOBS}'),
+            fmt('install -C -D {SHA256DIR}/libsha256.so {LIBDIR}/libsha256.so'),
         ],
         uptodate=[True],
         targets=[
-            'sota/sha256/test',
+            fmt('{SHA256DIR}/test'),
             fmt('{LIBDIR}/libsha256.so'),
         ],
         clean=[clean_targets],
@@ -250,12 +253,14 @@ def task_sota():
             TARGET,
             fmt('{LIBDIR}/libcli.so'),
             fmt('{LIBDIR}/liblexer.so'),
+            fmt('{LIBDIR}/libsha256.so'),
         ] + rglob(fmt('{SOTADIR}/*.py')),
         task_dep=[
             'version',
             'pre',
             'libcli',
             'liblexer',
+            'libsha256',
         ],
         actions=[
             fmt('mkdir -p {BINDIR}'),
