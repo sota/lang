@@ -115,7 +115,13 @@ def pre_mypy():
     '''
     run mypy before the build
     '''
-    packages = [d for d in os.listdir('sota') if d != 'utils' and os.path.isdir('sota/'+d)]
+    def package_wanted(directory):
+        ignores = [
+            'utils',
+            '__pycache__',
+        ]
+        return directory not in ignores and os.path.isdir('sota/'+directory)
+    packages = [d for d in os.listdir('sota') if package_wanted(d)]
     return dict(
         name='mypy',
         task_dep=[
