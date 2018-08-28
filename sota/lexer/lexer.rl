@@ -47,14 +47,13 @@ inline void write(const char *data, int len) {
     machine sast;
 
     whitespace      = ' '+;
-    assign          = '=';
     tab             = '\t';
     hash            = '#';
     doublequote     = '"';
     newline         = "\n\r"|'\n'|'\r';
     number          = digit+ ('.' digit+)?;
-    syntax          = '"'|"'"|'.'|','|'('|')'|'['|']'|'{'|'}'|':'|';';
-    symbol          = (any -- ('#'|whitespace|newline|assign|syntax))+;
+    syntax          = '"'|"'"|'.'|'('|')'|'['|']'|'{'|'}'|';';
+    symbol          = (any - ('#'|whitespace|newline|syntax))+;
     counter         = (any | newline @{AddNewline(fpc);})*;
 
     commenter := |*
@@ -126,7 +125,7 @@ inline void write(const char *data, int len) {
     write data nofinal;
 }%%
 
-class SotaLexer {
+class Lexer {
     char const* const source;
     char const* const pe;
     char const* const eof;
@@ -142,7 +141,7 @@ class SotaLexer {
     std::vector<CToken> tokens;
 
 public:
-    SotaLexer(char const* const source)
+    Lexer(char const* const source)
         : source(source)
         , pe(source + strlen(source))
         , eof(source + strlen(source))
@@ -153,7 +152,7 @@ public:
         newlines.push_back(source-1);
     }
 
-    ~SotaLexer() {
+    ~Lexer() {
         newlines.clear();
         tokens.clear();
     }
@@ -188,26 +187,23 @@ public:
         return 0;
     }
 
-    void Token(long kind, long trim=0, long debug=0) {
+    void Token(long kind, long trim=0) {
         tokens.push_back({
             ts - source + trim,
             te - source - trim,
             kind,
             Line(ts),
-            Pos(ts),
-            0,
-            13});
+            Pos(ts)});
     }
 
-    void Token(long start, long end, long kind, long line, long pos, long skip, long debug=0) {
+    void Token(long start, long end, long kind, long line, long pos, long skip) {
         tokens.push_back({
             start,
             end,
             kind,
             line,
             pos,
-            skip,
-            13});
+            skip});
     }
 
     long Scan(CToken **tokens) {
@@ -221,7 +217,7 @@ public:
 
 extern "C" long scan(const char *source, struct CToken **tokens) {
     std::ios::sync_with_stdio(false);
-    SotaLexer lexer(source);
+    Lexer lexer(source);
     return lexer.Scan(tokens);
 }
 
