@@ -33,10 +33,13 @@ void substring(char *str, int start, int end) {
 
 int main(int argc, char *argv[]) {
     printf("test\n");
+    char content[] = "x + 1";
+    /*
     char *content;
     unsigned int size;
     size = load("../../examples/hello-world.sota", &content);
     assert(size);
+    */
     struct CToken *tokens = NULL;
     long count = scan((const char *)&content, &tokens);
     printf("count = %ld\n", count);
