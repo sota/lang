@@ -49,16 +49,30 @@ inline void write(const char *data, int len) {
     whitespace      = ' '+;
     tab             = '\t';
     hash            = '#';
+    singlequote     = "'";
     doublequote     = '"';
+    assign          = '=';
+    comma           = ',';
     newline         = "\n\r"|'\n'|'\r';
     number          = digit+ ('.' digit+)?;
     syntax          = '"'|"'"|'.'|'('|')'|'['|']'|'{'|'}'|';';
-    symbol          = (any - ('#'|whitespace|newline|syntax))+;
+    symbol          = (any - (assign|comma|hash|whitespace|newline|syntax))+;
     counter         = (any | newline @{AddNewline(fpc);})*;
 
     commenter := |*
         ("##" (any - newline)* newline) & counter => {
             Token(TokenKind::Comment);
+            fgoto body;
+        };
+
+        ("#!" (any - newline)* newline) & counter => {
+            //Token(TokenKind::Comment);
+            Token(
+                ts - source,
+                te - source - 1,
+                TokenKind::Comment,
+                Line(ts),
+                Pos(ts));
             fgoto body;
         };
 
@@ -70,6 +84,11 @@ inline void write(const char *data, int len) {
 
     string := |*
         ('"' (any - '"')* '"') & counter => {
+            Token(TokenKind::String, 1);
+            fgoto body;
+        };
+
+        ("'" (any - "'")* "'") & counter => {
             Token(TokenKind::String, 1);
             fgoto body;
         };
@@ -88,9 +107,22 @@ inline void write(const char *data, int len) {
             fgoto commenter;
         };
 
+        singlequote => {
+            fhold;
+            fgoto string;
+        };
+
         doublequote => {
             fhold;
             fgoto string;
+        };
+
+        assign => {
+            Token(fc);
+        };
+
+        comma => {
+            Token(fc);
         };
 
         tab => {
@@ -160,8 +192,6 @@ public:
     void AddNewline(const char *pchar) {
         if (pchar > newlines.back())
             newlines.push_back(pchar);
-        else
-            printf("UNEXPECTED BEHAVIOR!!!\n");
     }
 
     const char * Newline(const char *pchar) {
@@ -196,7 +226,7 @@ public:
             Pos(ts)});
     }
 
-    void Token(long start, long end, long kind, long line, long pos, long skip) {
+    void Token(long start, long end, long kind, long line, long pos, long skip=0) {
         tokens.push_back({
             start,
             end,
