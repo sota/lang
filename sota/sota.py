@@ -16,8 +16,11 @@ class Sota(object):
                 source = f.read()
         print('source found:')
         print(source)
+        print
         sourcehash = sha256(source)
-        print('sourcehash = ' + sourcehash)
+        print('source hash:')
+        print(sourcehash)
+        print
         tokens = lexer.scan(source)
         for token in tokens:
             print(token.to_str())
