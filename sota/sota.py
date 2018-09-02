@@ -10,14 +10,14 @@ class Sota(object):
         pass
 
     def run(self, source):
-        sourcehash = sha256(source)
-        print('sourcehash = ' + sourcehash)
         lexer = SotaLexer()
         if os.path.exists(source):
             with open(source, 'r') as f:
                 source = f.read()
         print('source found:')
         print(source)
+        sourcehash = sha256(source)
+        print('sourcehash = ' + sourcehash)
         tokens = lexer.scan(source)
         for token in tokens:
             print(token.to_str())
