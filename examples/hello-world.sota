@@ -1,5 +1,6 @@
 #!/usr/bin/sota
 
 main = ()
+    ## print hello world
     print 'hello world!'
 
