@@ -70,7 +70,7 @@ inline void write(const char *data, int len) {
             fgoto body;
         };
 
-        ('#' (any - '#')* '#') & counter => {
+        ('#' (any - ('!'|'#')) (any - '#')* '#') & counter => {
             Token(TokenKind::Comment);
             fgoto body;
         };
