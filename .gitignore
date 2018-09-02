@@ -151,3 +151,7 @@ share/
 sota/version.h
 sota/version.py
 sota/lexer/lexer.cpp
+
+# graph files
+*.dot
+*.png
