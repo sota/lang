@@ -43,6 +43,13 @@ inline void write(const char *data, int len) {
     cout.write(data, len);
 }
 
+class SotaLexerException : public std::exception {
+public:
+    virtual char const * what() {
+        return "Sota Lexer Exception";
+    }
+};
+
 %%{
     machine sota;
 
@@ -125,13 +132,28 @@ inline void write(const char *data, int len) {
         };
 
         '{'|'['|'(' => {
+            nesting.push_back(*ts);
             Token(fc);
-            ++nesting;
         };
 
         '}'|']'|')' => {
+            int back = nesting.back();
+            switch(*ts) {
+                case '}':
+                    if (back != '{')
+                        throw SotaLexerException();
+                    break;
+                case ']':
+                    if (back != '[')
+                        throw SotaLexerException();
+                    break;
+                case ')':
+                    if (back != '(')
+                        throw SotaLexerException();
+                    break;
+            }
+            nesting.pop_back();
             Token(fc);
-            --nesting;
         };
 
         number => {
@@ -162,7 +184,7 @@ class Lexer {
     int cs;
     int act;
     int top;
-    int nesting;
+    std::vector<int> nesting;
     std::vector<const char *> newlines;
     std::vector<CToken> tokens;
 
@@ -179,6 +201,7 @@ public:
     }
 
     ~Lexer() {
+        nesting.clear();
         newlines.clear();
         tokens.clear();
     }
