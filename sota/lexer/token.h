@@ -20,9 +20,9 @@ enum TokenKind {
 #undef T
 
 struct CToken {
+    long kind;
     long start;
     long end;
-    long kind;
     long line;
     long pos;
     long skip;

@@ -44,7 +44,7 @@ inline void write(const char *data, int len) {
 }
 
 %%{
-    machine sast;
+    machine sota;
 
     whitespace      = ' '+;
     tab             = '\t';
@@ -66,13 +66,7 @@ inline void write(const char *data, int len) {
         };
 
         ("#!" (any - newline)* newline) & counter => {
-            //Token(TokenKind::Comment);
-            Token(
-                ts - source,
-                te - source - 1,
-                TokenKind::Comment,
-                Line(ts),
-                Pos(ts));
+            Token(TokenKind::Comment, 0, 1);
             fgoto body;
         };
 
@@ -84,12 +78,12 @@ inline void write(const char *data, int len) {
 
     string := |*
         ('"' (any - '"')* '"') & counter => {
-            Token(TokenKind::String, 1);
+            Token(TokenKind::String);
             fgoto body;
         };
 
         ("'" (any - "'")* "'") & counter => {
-            Token(TokenKind::String, 1);
+            Token(TokenKind::String);
             fgoto body;
         };
     *|;
@@ -194,45 +188,44 @@ public:
             newlines.push_back(pchar);
     }
 
-    const char * Newline(const char *pchar) {
+    const char * Newline() {
         for (unsigned i = newlines.size(); i-- > 0;) {
-            if (pchar > newlines[i])
+            if (ts > newlines[i])
                 return newlines[i];
         }
         return 0;
     }
 
-    long Line(const char *pchar) {
+    long Start() {
+        return ts - source;
+    }
+
+    long End() {
+        return te - source;
+    }
+
+    long Line() {
         for (unsigned i = newlines.size(); i-- > 0;) {
-            if (pchar > newlines[i])
+            if (ts > newlines[i])
                 return i + 1;
         }
         return 0;
     }
 
-    long Pos(const char *pchar) {
-        const char *nl = Newline(pchar);
+    long Pos() {
+        const char *nl = Newline();
         if (nl)
-            return pchar - nl;
+            return ts - nl;
         return 0;
     }
 
-    void Token(long kind, long trim=0) {
+    void Token(long kind, long ltrim=0, long rtrim=0, long skip=0) {
         tokens.push_back({
-            ts - source + trim,
-            te - source - trim,
             kind,
-            Line(ts),
-            Pos(ts)});
-    }
-
-    void Token(long start, long end, long kind, long line, long pos, long skip=0) {
-        tokens.push_back({
-            start,
-            end,
-            kind,
-            line,
-            pos,
+            Start() + ltrim,
+            End() - rtrim,
+            Line(),
+            Pos(),
             skip});
     }
 

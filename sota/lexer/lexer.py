@@ -18,9 +18,9 @@ from .token import Token
 
 CTOKEN = rffi.CStruct(
     'CToken',
+    ('kind', rffi.LONG),
     ('start', rffi.LONG),
     ('end', rffi.LONG),
-    ('kind', rffi.LONG),
     ('line', rffi.LONG),
     ('pos', rffi.LONG),
     ('skip', rffi.LONG),
@@ -105,9 +105,9 @@ class SotaLexer(object):
             result = c_scan(csource, ctokenpp)
             for i in range(result):
                 ctoken  = deref(ctokenpp)[i]
+                kind    = rffi.cast(lltype.Signed, ctoken.c_kind)
                 start   = rffi.cast(lltype.Signed, ctoken.c_start)
                 end     = rffi.cast(lltype.Signed, ctoken.c_end)
-                kind    = rffi.cast(lltype.Signed, ctoken.c_kind)
                 line    = rffi.cast(lltype.Signed, ctoken.c_line)
                 pos     = rffi.cast(lltype.Signed, ctoken.c_pos)
                 skip    = rffi.cast(lltype.Signed, ctoken.c_skip) != 0
