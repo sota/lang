@@ -205,6 +205,30 @@ def task_liblexer():
         clean=[clean_targets],
     )
 
+def task_graph():
+    '''
+    create Graphviz PNGs
+    '''
+    for machine in ('body', 'string', 'commenter'):
+        yield dict(
+            name=machine,
+            file_dep=[
+                fmt('{LEXERDIR}/lexer.rl'),
+            ],
+            task_dep=[
+                'liblexer',
+            ],
+            actions=[
+                fmt('cd {LEXERDIR} && {RAGEL} lexer.rl -V -M {machine} -o {machine}.dot'),
+                fmt('cd {LEXERDIR} && dot -Tpng {machine}.dot -o {machine}.png'),
+            ],
+            targets=[
+                fmt('{LEXERDIR}/{machine}.dot'),
+                fmt('{LEXERDIR}/{machine}.png'),
+            ],
+            clean=[clean_targets],
+        )
+
 def task_libcli():
     '''
     build so libary for use as sota's commandline interface
