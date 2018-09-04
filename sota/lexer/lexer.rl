@@ -137,23 +137,17 @@ public:
         };
 
         '}'|']'|')' => {
-            int back = nesting.back();
-            switch(*ts) {
-                case '}':
-                    if (back != '{')
-                        throw SotaLexerException();
+            switch(nesting.back() + *ts) {
+                case '{' + '}':
+                case '[' + ']':
+                case '(' + ')':
+                    nesting.pop_back();
+                    Token(fc);
                     break;
-                case ']':
-                    if (back != '[')
-                        throw SotaLexerException();
-                    break;
-                case ')':
-                    if (back != '(')
-                        throw SotaLexerException();
+                default:
+                    throw SotaLexerException();
                     break;
             }
-            nesting.pop_back();
-            Token(fc);
         };
 
         number => {
