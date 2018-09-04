@@ -84,14 +84,6 @@ class SotaLexer(object):
         self.source = None
         self.tokens = []
         self.index = 0
-        self.kind2name = {
-            261: 'sym',
-            262: 'num',
-            263: 'str',
-            264: 'cmt',
-        }
-        for c in xrange(40, 127):
-            self.kind2name[c] = chr(c)
 
     def scan(self, source):
         '''
@@ -112,11 +104,10 @@ class SotaLexer(object):
                 pos     = rffi.cast(lltype.Signed, ctoken.c_pos)
                 skip    = rffi.cast(lltype.Signed, ctoken.c_skip) != 0
                 debug   = rffi.cast(lltype.Signed, ctoken.c_debug)
-                name    = self.kind2name.get(kind, None)
                 assert start >= 0, "start not >= 0"
                 assert end >= 0, "end not >= 0"
                 value   = self.source[start:end]
-                self.tokens.append(Token(name, value, kind, line, pos, skip, debug))
+                self.tokens.append(Token(kind, value, line, pos, skip, debug))
         return self.tokens
 
     def lookahead(self, distance, expect=None, skips=False):

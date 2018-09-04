@@ -2,18 +2,27 @@
 sota.token
 '''
 
+KIND2NAME = {
+    261: 'sym',
+    262: 'num',
+    263: 'str',
+    264: 'cmt',
+}
+for c in xrange(40, 127):
+    KIND2NAME[c] = chr(c)
+
 class Token(object):
     '''
     Token
     '''
 
-    def __init__(self, name, value, kind, line, pos, skip, debug):
+    def __init__(self, kind, value, line, pos, skip, debug):
         '''
         init
         '''
-        self.name = name
-        self.value = value
+        self.name = KIND2NAME[kind]
         self.kind = kind
+        self.value = value
         self.line = line
         self.pos = pos
         self.skip = skip
@@ -33,10 +42,10 @@ class Token(object):
         '''
         to_repr
         '''
-        return 'Token(name=%s value=%s kind=%d line=%d pos=%d skip=%s debug=%d)' % (
+        return 'Token(name=%s kind=%d value=%s line=%d pos=%d skip=%s debug=%d)' % (
             self.name,
-            self.value,
             self.kind,
+            self.value,
             self.line,
             self.pos,
             self.skip,
