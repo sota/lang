@@ -10,7 +10,6 @@ from ruamel import yaml
 from doit.task import clean_targets
 
 from sota.utils.shell import call, rglob
-from sota.utils.fmt import fmt, pfmt, dbg
 from sota.constants import *
 
 DOIT_CONFIG = {
@@ -25,7 +24,7 @@ def task_version():
     templates = {}
     for template in rglob('sota/*.template'):
         filename = template[:-len('.template')]
-        contents = fmt(open(template).read())
+        contents = open(template).read()
         templates[filename] = contents
     def render():
         for filename, contents in templates.items():
@@ -56,7 +55,7 @@ def task_submod():
         yield dict(
             name=submod,
             actions=[
-                fmt('git submodule update --init {submod}')
+                f'git submodule update --init {submod}'
             ],
             uptodate=[all(map(lambda sym: not sha1hash.startswith(sym), SYMS))],
         )
@@ -72,7 +71,7 @@ def pre_pylint():
             'version',
         ],
         actions=[
-            fmt('pylint -j{JOBS} --rcfile {PREDIR}/pylint.rc {SOTADIR} || true'),
+            'pylint -j{JOBS} --rcfile {PREDIR}/pylint.rc {SOTADIR} || true',
         ]
     )
 
@@ -89,8 +88,8 @@ def pre_pytest():
             'libsha256',
         ],
         actions=[
-            fmt('echo "{REPOROOT}"'),
-            fmt('{PYTHON} -m pytest -s -vv {PREDIR}'),
+            f'echo "{REPOROOT}"',
+            f'{PYTHON} -m pytest -s -vv {PREDIR}',
         ],
     )
 
@@ -107,7 +106,7 @@ def pre_pycov():
             'libsha256',
         ],
         actions=[
-            fmt('{PYTHON} -m pytest -s -vv --cov={SOTADIR} {PREDIR}'),
+            f'{PYTHON} -m pytest -s -vv --cov={SOTADIR} {PREDIR}',
         ],
     )
 
@@ -131,7 +130,7 @@ def pre_mypy():
             'libsha256',
         ],
         actions=[
-            'mypy' + ''.join([fmt(' --module sota.{package}') for package in packages]),
+            'mypy' + ''.join([f' --module sota.{package}' for package in packages]),
         ],
     )
 
@@ -150,12 +149,12 @@ def task_colm():
     '''
     return dict(
         task_dep=[
-            fmt('submod:repos/colm'),
+            f'submod:repos/colm',
         ],
         actions=[
-            fmt('cd {COLMDIR} && autoreconf -f -i'),
-            fmt('cd {COLMDIR} && ./configure --prefix={REPOROOT}'),
-            fmt('cd {COLMDIR} && make && make install'),
+            f'cd {COLMDIR} && autoreconf -f -i',
+            f'cd {COLMDIR} && ./configure --prefix={REPOROOT}',
+            f'cd {COLMDIR} && make && make install',
         ],
         uptodate=[True],
         targets=[COLM],
@@ -168,13 +167,13 @@ def task_ragel():
     '''
     return dict(
         task_dep=[
-            fmt('submod:repos/ragel'),
+            'submod:repos/ragel',
             'colm',
         ],
         actions=[
-            fmt('cd {RAGELDIR} && autoreconf -f -i'),
-            fmt('cd {RAGELDIR} && ./configure --prefix={REPOROOT} --with-colm={REPOROOT} --disable-manual'),
-            fmt('cd {RAGELDIR} && make && make install'),
+            f'cd {RAGELDIR} && autoreconf -f -i',
+            f'cd {RAGELDIR} && ./configure --prefix={REPOROOT} --with-colm={REPOROOT} --disable-manual',
+            f'cd {RAGELDIR} && make && make install',
         ],
         uptodate=[True],
         targets=[RAGEL],
@@ -185,7 +184,7 @@ def task_liblexer():
     '''
     build so libary for use as sota's lexer
     '''
-    files = [fmt('{LEXERDIR}/lexer.py')] + rglob(LEXERDIR + '/*.{h,rl,c}')
+    files = [f'{LEXERDIR}/lexer.py'] + rglob(LEXERDIR + '/*.{h,rl,c}')
     return dict(
         file_dep=files,
         task_dep=[
@@ -193,14 +192,14 @@ def task_liblexer():
             'ragel',
         ],
         actions=[
-            fmt('cd {LEXERDIR} && LD_LIBRARY_PATH={LIBDIR} make --trace -j {JOBS} RAGEL={RAGEL}'),
-            fmt('install -C -D {LEXERDIR}/liblexer.so {LIBDIR}/liblexer.so'),
+            f'cd {LEXERDIR} && LD_LIBRARY_PATH={LIBDIR} make --trace -j {JOBS} RAGEL={RAGEL}',
+            f'install -C -D {LEXERDIR}/liblexer.so {LIBDIR}/liblexer.so',
         ],
         uptodate=[True],
         targets=[
-            fmt('{LIBDIR}/liblexer.so'),
-            fmt('{LEXERDIR}/lexer.cpp'),
-            fmt('{LEXERDIR}/test'),
+            f'{LIBDIR}/liblexer.so',
+            f'{LEXERDIR}/lexer.cpp',
+            f'{LEXERDIR}/test',
         ],
         clean=[clean_targets],
     )
@@ -213,18 +212,18 @@ def task_graph():
         yield dict(
             name=machine,
             file_dep=[
-                fmt('{LEXERDIR}/lexer.rl'),
+                f'{LEXERDIR}/lexer.rl',
             ],
             task_dep=[
                 'liblexer',
             ],
             actions=[
-                fmt('cd {LEXERDIR} && {RAGEL} lexer.rl -V -M {machine} -o {machine}.dot'),
-                fmt('cd {LEXERDIR} && dot -Tpng {machine}.dot -o {machine}.png'),
+                f'cd {LEXERDIR} && {RAGEL} lexer.rl -V -M {machine} -o {machine}.dot',
+                f'cd {LEXERDIR} && dot -Tpng {machine}.dot -o {machine}.png',
             ],
             targets=[
-                fmt('{LEXERDIR}/{machine}.dot'),
-                fmt('{LEXERDIR}/{machine}.png'),
+                f'{LEXERDIR}/{machine}.dot',
+                f'{LEXERDIR}/{machine}.png',
             ],
             clean=[clean_targets],
         )
@@ -238,16 +237,16 @@ def task_libcli():
         file_dep=files,
         task_dep=[
             'version',
-            fmt('submod:repos/docopt'),
+            'submod:repos/docopt',
         ],
         actions=[
-            fmt('cd {CLIDIR} && make --trace -j {JOBS}'),
-            fmt('install -C -D {CLIDIR}/libcli.so {LIBDIR}/libcli.so'),
+            f'cd {CLIDIR} && make --trace -j {JOBS}',
+            f'install -C -D {CLIDIR}/libcli.so {LIBDIR}/libcli.so',
         ],
         uptodate=[True],
         targets=[
-            fmt('{CLIDIR}/test'),
-            fmt('{LIBDIR}/libcli.so'),
+            f'{CLIDIR}/test',
+            f'{LIBDIR}/libcli.so',
         ],
         clean=[clean_targets],
     )
@@ -263,13 +262,13 @@ def task_libsha256():
             'version',
         ],
         actions=[
-            fmt('cd {SHA256DIR} && make --trace -j {JOBS}'),
-            fmt('install -C -D {SHA256DIR}/libsha256.so {LIBDIR}/libsha256.so'),
+            f'cd {SHA256DIR} && make --trace -j {JOBS}',
+            f'install -C -D {SHA256DIR}/libsha256.so {LIBDIR}/libsha256.so',
         ],
         uptodate=[True],
         targets=[
-            fmt('{SHA256DIR}/test'),
-            fmt('{LIBDIR}/libsha256.so'),
+            f'{SHA256DIR}/test',
+            f'{LIBDIR}/libsha256.so',
         ],
         clean=[clean_targets],
     )
@@ -282,10 +281,10 @@ def task_sota():
         file_dep=[
             DODO,
             TARGET,
-            fmt('{LIBDIR}/libcli.so'),
-            fmt('{LIBDIR}/liblexer.so'),
-            fmt('{LIBDIR}/libsha256.so'),
-        ] + rglob(fmt('{SOTADIR}/*.py')),
+            f'{LIBDIR}/libcli.so',
+            f'{LIBDIR}/liblexer.so',
+            f'{LIBDIR}/libsha256.so',
+        ] + rglob(f'{SOTADIR}/*.py'),
         task_dep=[
             'version',
             'pre',
@@ -294,11 +293,11 @@ def task_sota():
             'libsha256',
         ],
         actions=[
-            fmt('mkdir -p {BINDIR}'),
-            fmt('{PYTHON} -B {RPYTHON} --no-pdb --output {BINDIR}/{BINARY} {TARGET}'),
+            f'mkdir -p {BINDIR}',
+            f'{PYTHON} -B {RPYTHON} --no-pdb --output {BINDIR}/{BINARY} {TARGET}',
         ],
         uptodate=[True],
-        targets=[fmt('{BINDIR}/{BINARY}')],
+        targets=[f'{BINDIR}/{BINARY}'],
         clean=[clean_targets],
     )
 
@@ -313,7 +312,7 @@ def post_pytest():
             'sota',
         ],
         actions=[
-            fmt('{PYTHON} -m pytest -s -vv {POSTDIR}'),
+            f'{PYTHON} -m pytest -s -vv {POSTDIR}',
         ],
     )
 
@@ -334,7 +333,7 @@ def task_rmcache():
             yield dict(
                 name=py + '-' + dir_,
                 actions=[
-                    fmt('find {dir_} -depth -name {cache} -type d {exec_rm}'),
+                    f'find {dir_} -depth -name {cache} -type d {exec_rm}',
                 ],
             )
 
@@ -350,6 +349,6 @@ def task_tidy():
         yield dict(
             name=submod,
             actions=[
-                fmt('cd {submod} && git reset --hard HEAD && git clean -xfd')
+                f'cd {submod} && git reset --hard HEAD && git clean -xfd'
             ],
         )
