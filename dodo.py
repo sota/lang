@@ -71,7 +71,7 @@ def pre_pylint():
             'version',
         ],
         actions=[
-            'pylint -j{JOBS} --rcfile {PREDIR}/pylint.rc {SOTADIR} || true',
+            f'pylint -j{JOBS} --rcfile {PREDIR}/pylint.rc {SOTADIR} || true',
         ]
     )
 
